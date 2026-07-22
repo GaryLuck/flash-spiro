@@ -56,9 +56,15 @@
         </button>
 
         <!-- Clear Active Layer / Clear All -->
-        <button id="btn-clear-canvas" class="btn btn-secondary" title="Clear current layer drawings">
-          <i class="ri-delete-bin-6-line"></i> <span>Clear</span>
-        </button>
+        <div class="clear-selector dropdown">
+          <button id="btn-clear-dropdown" class="btn btn-secondary" title="Clear Canvas Options">
+            <i class="ri-delete-bin-6-line"></i> <span>Clear</span>
+          </button>
+          <div class="dropdown-menu" id="clear-menu">
+            <button id="btn-clear-active" class="dropdown-item"><i class="ri-delete-bin-line"></i> Clear Active Layer</button>
+            <button id="btn-clear-all" class="dropdown-item"><i class="ri-delete-bin-7-line"></i> Clear All Layers</button>
+          </div>
+        </div>
 
         <!-- Export Menu -->
         <div class="export-selector dropdown">

@@ -252,9 +252,24 @@ export class UIController {
       this.audioIcon.className = enabled ? 'ri-volume-up-line' : 'ri-volume-mute-line';
     });
 
-    // Clear Canvas
-    this.btnClearCanvas.addEventListener('click', () => {
+    // Clear Dropdown
+    this.btnClearDropdown = document.getElementById('btn-clear-dropdown');
+    this.clearMenu = document.getElementById('clear-menu');
+    this.btnClearActive = document.getElementById('btn-clear-active');
+    this.btnClearAll = document.getElementById('btn-clear-all');
+
+    this.btnClearDropdown.addEventListener('click', () => {
+      this.clearMenu.parentElement.classList.toggle('open');
+    });
+
+    this.btnClearActive.addEventListener('click', () => {
       this.app.clearCurrentLayer();
+      this.clearMenu.parentElement.classList.remove('open');
+    });
+
+    this.btnClearAll.addEventListener('click', () => {
+      this.app.clearAllLayers();
+      this.clearMenu.parentElement.classList.remove('open');
     });
 
     // Preset Modal

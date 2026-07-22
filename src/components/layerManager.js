@@ -11,14 +11,14 @@ export class LayerManager {
     this.nextId = 1;
   }
 
-  createDefaultLayer(params, points) {
+  createDefaultLayer(params, points = [], progress = 0) {
     const id = `layer-${this.nextId++}`;
     const newLayer = {
       id,
       name: `Pattern ${this.nextId - 1}`,
       visible: true,
       locked: false,
-      progress: 1.0,
+      progress: progress,
       points: points || [],
       ...params
     };
@@ -27,6 +27,10 @@ export class LayerManager {
     this.activeLayerId = id;
     this.notify();
     return newLayer;
+  }
+
+  getLayers() {
+    return this.layers;
   }
 
   getActiveLayer() {

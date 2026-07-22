@@ -84,7 +84,7 @@ class SpirographApp {
     };
     
     this.recalculateCurrentPath();
-    this.layerManager.createDefaultLayer(params, this.currentPathData.points);
+    this.layerManager.createDefaultLayer(params, [], 0);
     this.ui.updateMathDisplay(this.currentPathData.stats, this.R, this.r, this.dRatio);
   }
 
@@ -286,6 +286,7 @@ class SpirographApp {
   addNewLayer() {
     this.pause();
     this.recalculateCurrentPath();
+    this.currentTheta = 0;
     const params = {
       R: this.R,
       r: this.r,
@@ -296,7 +297,7 @@ class SpirographApp {
       width: this.strokeWidth,
       opacity: this.opacity
     };
-    this.layerManager.createDefaultLayer(params, this.currentPathData.points);
+    this.layerManager.createDefaultLayer(params, [], 0);
     this.renderGearOverlay();
   }
 
@@ -333,8 +334,21 @@ class SpirographApp {
     this.pause();
     this.layerManager.clearActiveLayer();
     this.currentPointIndex = 0;
+    this.currentTheta = 0;
     this.ui.updateProgress(0);
     this.canvasRenderer.clearActiveCanvas();
+    this.canvasRenderer.renderLayers(this.layerManager.getLayers());
+    this.renderGearOverlay();
+  }
+
+  clearAllLayers() {
+    this.pause();
+    this.layerManager.clearAllLayers();
+    this.currentPointIndex = 0;
+    this.currentTheta = 0;
+    this.ui.updateProgress(0);
+    this.canvasRenderer.clearActiveCanvas();
+    this.initDefaultLayer();
     this.renderGearOverlay();
   }
 
@@ -365,7 +379,7 @@ class SpirographApp {
       penMode: this.penMode,
       width: this.strokeWidth,
       opacity: this.opacity
-    }, this.currentPathData.points);
+    }, this.currentPathData.points, 1.0);
 
     this.ui.updateMathDisplay(this.currentPathData.stats, this.R, this.r, this.dRatio);
     this.instantComplete();
@@ -373,10 +387,23 @@ class SpirographApp {
 
   // --- Manual Drag Control ---
   initDragControls() {
+    this.lastPointerAngle = null;
+    this.currentTheta = 0;
+
     const handlePointerDown = (e) => {
       if (!this.manualDrag) return;
       this.isDragging = true;
-      this.updateDragProgress(e);
+      this.gearCanvas.style.cursor = 'grabbing';
+
+      const rect = this.gearCanvas.getBoundingClientRect();
+      const cx = rect.width / 2;
+      const cy = rect.height / 2;
+      const px = e.clientX - rect.left - cx;
+      const py = e.clientY - rect.top - cy;
+
+      this.lastPointerAngle = Math.atan2(py, px);
+      const totalPoints = this.currentPathData.points.length;
+      this.currentTheta = (this.currentPointIndex / totalPoints) * this.currentPathData.maxTheta;
     };
 
     const handlePointerMove = (e) => {
@@ -387,6 +414,10 @@ class SpirographApp {
     const handlePointerUp = () => {
       if (this.isDragging) {
         this.isDragging = false;
+        this.lastPointerAngle = null;
+        if (this.gearCanvas) {
+          this.gearCanvas.style.cursor = this.manualDrag ? 'grab' : 'default';
+        }
       }
     };
 
@@ -396,24 +427,36 @@ class SpirographApp {
   }
 
   updateDragProgress(e) {
+    if (this.lastPointerAngle === null) return;
+
     const rect = this.gearCanvas.getBoundingClientRect();
     const cx = rect.width / 2;
     const cy = rect.height / 2;
     const px = e.clientX - rect.left - cx;
     const py = e.clientY - rect.top - cy;
 
-    let angle = Math.atan2(py, px);
-    if (angle < 0) angle += Math.PI * 2;
+    const currentAngle = Math.atan2(py, px);
+    let deltaAngle = currentAngle - this.lastPointerAngle;
+
+    // Handle smooth wrap-around across -PI / +PI quadrant boundary
+    if (deltaAngle > Math.PI) deltaAngle -= Math.PI * 2;
+    if (deltaAngle < -Math.PI) deltaAngle += Math.PI * 2;
 
     const maxTheta = this.currentPathData.maxTheta;
-    const numLoops = Math.ceil(maxTheta / (Math.PI * 2));
-    const currentLoop = Math.floor((this.currentPointIndex / this.currentPathData.points.length) * numLoops);
-    
-    let targetTheta = currentLoop * Math.PI * 2 + angle;
-    if (targetTheta > maxTheta) targetTheta = maxTheta;
+    this.currentTheta += deltaAngle;
+
+    if (this.currentTheta < 0) this.currentTheta = 0;
+    if (this.currentTheta >= maxTheta) {
+      this.currentTheta = maxTheta;
+    }
+
+    this.lastPointerAngle = currentAngle;
 
     const totalPoints = this.currentPathData.points.length;
-    const targetIdx = Math.floor((targetTheta / maxTheta) * totalPoints);
+    const targetIdx = Math.min(
+      totalPoints - 1,
+      Math.max(0, Math.floor((this.currentTheta / maxTheta) * totalPoints))
+    );
 
     if (Math.abs(targetIdx - this.currentPointIndex) > 1) {
       this.audio.playGearClick();
@@ -422,8 +465,17 @@ class SpirographApp {
     this.currentPointIndex = targetIdx;
     const progress = this.currentPointIndex / totalPoints;
     this.ui.updateProgress(progress);
-    this.canvasRenderer.renderActiveStroke(this.currentPathData.points, this.layerManager.getActiveLayer(), progress);
+
+    const activeLayer = this.layerManager.getActiveLayer();
+    this.canvasRenderer.renderActiveStroke(this.currentPathData.points, activeLayer, progress);
     this.renderGearOverlay();
+
+    // Auto-commit active layer on 100% manual completion
+    if (progress >= 0.999) {
+      this.finishDrawingActiveLayer();
+      this.isDragging = false;
+      this.lastPointerAngle = null;
+    }
   }
 
   // --- Audio & Export ---
