@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spirograph Studio - Interactive Geometric Art Toy</title>
+  <meta name="description" content="An interactive, physically-accurate classic Spirograph toy and geometric drawing studio. Create stunning mathematical art, multi-layer mandalas, and vector patterns." />
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Remix Icons for crisp modern vector icons -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+
+  <script type="module" crossorigin src="/assets/index-CMPjNEtu.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DiX7xpFi.css">
+</head>
+<body class="theme-studio">
+  <div id="app">
+    <!-- Top Header Bar -->
+    <header class="app-header">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <i class="ri-compasses-2-line"></i>
+        </div>
+        <div class="logo-text">
+          <h1>Spirograph Studio</h1>
+          <span class="badge">PRO TOY</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Preset Library Button -->
+        <button id="btn-presets" class="btn btn-secondary" title="Browse Preset Designs">
+          <i class="ri-gallery-line"></i> <span>Presets</span>
+        </button>
+
+        <!-- Paper Texture Picker -->
+        <div class="paper-selector dropdown">
+          <button id="btn-paper-dropdown" class="btn btn-icon-text" title="Change Studio Canvas Paper">
+            <i class="ri-palette-line"></i> <span id="current-paper-name">Studio Dark</span>
+          </button>
+          <div class="dropdown-menu" id="paper-menu">
+            <button data-paper="studio" class="dropdown-item active"><i class="ri-moon-line"></i> Studio Dark</button>
+            <button data-paper="white" class="dropdown-item"><i class="ri-sun-line"></i> Fine White Paper</button>
+            <button data-paper="parchment" class="dropdown-item"><i class="ri-file-paper-2-line"></i> Vintage Parchment</button>
+            <button data-paper="blueprint" class="dropdown-item"><i class="ri-grid-fill"></i> Cyber Blueprint</button>
+            <button data-paper="neon" class="dropdown-item"><i class="ri-flashlight-line"></i> Midnight Neon</button>
+          </div>
+        </div>
+
+        <!-- Audio Toggle -->
+        <button id="btn-audio-toggle" class="btn btn-icon" title="Toggle Mechanical Gear & Pen Sounds">
+          <i class="ri-volume-up-line" id="audio-icon"></i>
+        </button>
+
+        <!-- Clear Active Layer / Clear All -->
+        <button id="btn-clear-canvas" class="btn btn-secondary" title="Clear current layer drawings">
+          <i class="ri-delete-bin-6-line"></i> <span>Clear</span>
+        </button>
+
+        <!-- Export Menu -->
+        <div class="export-selector dropdown">
+          <button id="btn-export-dropdown" class="btn btn-primary">
+            <i class="ri-download-2-line"></i> <span>Export</span>
+          </button>
+          <div class="dropdown-menu" id="export-menu">
+            <button id="export-png-high" class="dropdown-item"><i class="ri-file-image-line"></i> High-Res PNG</button>
+            <button id="export-png-transparent" class="dropdown-item"><i class="ri-image-line"></i> Transparent PNG</button>
+            <button id="export-svg" class="dropdown-item"><i class="ri-code-s-slash-line"></i> Scalable SVG Vector</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="workspace">
+      <!-- Left Sidebar: Gear Geometry & Pen Controls -->
+      <aside class="sidebar left-sidebar" id="left-sidebar">
+        <div class="panel-section">
+          <h2 class="section-title"><i class="ri-settings-4-line"></i> Mode & Gear Geometry</h2>
+          
+          <!-- Mode Tabs: Hypotrochoid (Inside) vs Epitrochoid (Outside) -->
+          <div class="segmented-control" id="mode-control">
+            <button class="segment-btn active" data-mode="hypo">
+              <i class="ri-space-ship-line"></i> Inside Ring (Hypo)
+            </button>
+            <button class="segment-btn" data-mode="epi">
+              <i class="ri-donut-chart-line"></i> Outside Ring (Epi)
+            </button>
+          </div>
+
+          <!-- Stator Gear (Ring) Selection -->
+          <div class="control-group">
+            <div class="label-row">
+              <label for="ring-radius-slider">Fixed Ring Teeth ($R$)</label>
+              <span class="value-badge" id="ring-radius-val">105 teeth</span>
+            </div>
+            <input type="range" id="ring-radius-slider" min="60" max="180" step="3" value="105" />
+            <div class="preset-pills" id="ring-presets">
+              <button class="pill-btn active" data-ring="105">105</button>
+              <button class="pill-btn" data-ring="96">96</button>
+              <button class="pill-btn" data-ring="144">144</button>
+              <button class="pill-btn" data-ring="120">120</button>
+            </div>
+          </div>
+
+          <!-- Rotor Gear (Wheel) Selection -->
+          <div class="control-group">
+            <div class="label-row">
+              <label for="wheel-radius-slider">Moving Wheel Teeth ($r$)</label>
+              <span class="value-badge" id="wheel-radius-val">63 teeth</span>
+            </div>
+            <input type="range" id="wheel-radius-slider" min="12" max="96" step="1" value="63" />
+            <div class="preset-pills" id="wheel-presets">
+              <button class="pill-btn" data-wheel="84">84</button>
+              <button class="pill-btn" data-wheel="75">75</button>
+              <button class="pill-btn active" data-wheel="63">63</button>
+              <button class="pill-btn" data-wheel="52">52</button>
+              <button class="pill-btn" data-wheel="45">45</button>
+              <button class="pill-btn" data-wheel="30">30</button>
+            </div>
+          </div>
+
+          <!-- Pen Hole Distance (d) -->
+          <div class="control-group">
+            <div class="label-row">
+              <label for="pen-dist-slider">Pen Hole Offset ($d$)</label>
+              <span class="value-badge" id="pen-dist-val">Hole #5 (65%)</span>
+            </div>
+            <input type="range" id="pen-dist-slider" min="0.05" max="0.95" step="0.01" value="0.65" />
+            
+            <!-- Quick Hole Selector Buttons -->
+            <div class="hole-grid" id="hole-picker">
+              <!-- Dynamically populated hole dots -->
+            </div>
+          </div>
+
+          <!-- Symmetry / Ratio Math Summary -->
+          <div class="math-summary-box">
+            <div class="math-item">
+              <span class="math-label">Gear Ratio ($R : r$)</span>
+              <span class="math-val" id="math-ratio">5 : 3</span>
+            </div>
+            <div class="math-item">
+              <span class="math-label">Petals / Points</span>
+              <span class="math-val" id="math-petals">5 Petals</span>
+            </div>
+            <div class="math-item">
+              <span class="math-label">Full Rotations</span>
+              <span class="math-val" id="math-revs">3 Loops</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-divider"></div>
+
+        <!-- Pen Styling Panel -->
+        <div class="panel-section">
+          <h2 class="section-title"><i class="ri-ink-bottle-line"></i> Pen Ink & Style</h2>
+
+          <!-- Color Mode Selector -->
+          <div class="control-group">
+            <label>Pen Ink Mode</label>
+            <div class="segmented-control-small" id="pen-mode-control">
+              <button class="segment-btn active" data-penmode="solid">Solid</button>
+              <button class="segment-btn" data-penmode="rainbow">Rainbow</button>
+              <button class="segment-btn" data-penmode="glow">Neon Glow</button>
+            </div>
+          </div>
+
+          <!-- Color Swatches & Custom Picker -->
+          <div class="control-group" id="solid-color-group">
+            <div class="color-swatches" id="color-swatches">
+              <button class="swatch active" style="background: #3a86ff;" data-color="#3a86ff"></button>
+              <button class="swatch" style="background: #ff006e;" data-color="#ff006e"></button>
+              <button class="swatch" style="background: #8338ec;" data-color="#8338ec"></button>
+              <button class="swatch" style="background: #ffbe0b;" data-color="#ffbe0b"></button>
+              <button class="swatch" style="background: #00f5d4;" data-color="#00f5d4"></button>
+              <button class="swatch" style="background: #fb5607;" data-color="#fb5607"></button>
+              <button class="swatch" style="background: #ffffff;" data-color="#ffffff"></button>
+              <div class="custom-color-wrapper">
+                <input type="color" id="custom-color-picker" value="#3a86ff" />
+                <i class="ri-add-line"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stroke Width & Opacity -->
+          <div class="control-group">
+            <div class="label-row">
+              <label for="stroke-width-slider">Line Width</label>
+              <span class="value-badge" id="stroke-width-val">2.0 px</span>
+            </div>
+            <input type="range" id="stroke-width-slider" min="0.5" max="10" step="0.5" value="2.0" />
+          </div>
+
+          <div class="control-group">
+            <div class="label-row">
+              <label for="opacity-slider">Pen Opacity</label>
+              <span class="value-badge" id="opacity-val">90%</span>
+            </div>
+            <input type="range" id="opacity-slider" min="0.1" max="1.0" step="0.05" value="0.9" />
+          </div>
+        </div>
+      </aside>
+
+      <!-- Center Canvas Interactive Area -->
+      <section class="canvas-container">
+        <!-- Multi-layer Canvas Stack -->
+        <div class="canvas-wrapper" id="canvas-wrapper">
+          <!-- Background paper canvas -->
+          <canvas id="bg-canvas"></canvas>
+          <!-- Finished drawn lines canvas -->
+          <canvas id="drawing-canvas"></canvas>
+          <!-- Active animating stroke canvas -->
+          <canvas id="active-canvas"></canvas>
+          <!-- Visual gear overlay canvas (gear teeth & pen position) -->
+          <canvas id="gear-canvas"></canvas>
+        </div>
+
+        <!-- Floating On-Canvas Controls -->
+        <div class="floating-controls">
+          <!-- Zoom / Fit View -->
+          <div class="tool-group">
+            <button id="btn-zoom-in" class="tool-btn" title="Zoom In"><i class="ri-zoom-in-line"></i></button>
+            <button id="btn-zoom-reset" class="tool-btn" title="Reset View (100%)">100%</button>
+            <button id="btn-zoom-out" class="tool-btn" title="Zoom Out"><i class="ri-zoom-out-line"></i></button>
+          </div>
+
+          <!-- Gear Overlay Visibility Toggle -->
+          <div class="tool-group">
+            <button id="btn-toggle-gears" class="tool-btn active" title="Show/Hide Plastic Gears">
+              <i class="ri-settings-3-line"></i> <span>Show Gears</span>
+            </button>
+            <button id="btn-toggle-manual" class="tool-btn" title="Toggle Manual Crank Drag Mode">
+              <i class="ri-drag-move-2-line"></i> <span>Manual Drag</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Bottom Playback Timeline & Animation Toolbar -->
+        <div class="playback-bar">
+          <button id="btn-play-pause" class="btn btn-action-main">
+            <i class="ri-play-fill" id="play-icon"></i> <span id="play-text">Start Drawing</span>
+          </button>
+          
+          <button id="btn-instant-draw" class="btn btn-secondary" title="Instantly render complete pattern">
+            <i class="ri-flashlight-line"></i> <span>Instant Complete</span>
+          </button>
+
+          <!-- Animation Progress Slider -->
+          <div class="progress-container">
+            <input type="range" id="draw-progress-slider" min="0" max="100" value="0" step="0.1" />
+            <span class="progress-badge" id="progress-val">0%</span>
+          </div>
+
+          <!-- Speed Slider -->
+          <div class="speed-control">
+            <i class="ri-speed-line"></i>
+            <input type="range" id="draw-speed-slider" min="1" max="50" step="1" value="15" title="Drawing Speed" />
+            <span id="speed-val">15x</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Sidebar: Layer Stack Manager -->
+      <aside class="sidebar right-sidebar" id="right-sidebar">
+        <div class="panel-section">
+          <div class="section-header-row">
+            <h2 class="section-title"><i class="ri-stack-line"></i> Layers Stack</h2>
+            <button id="btn-add-layer" class="btn btn-icon-small" title="Add New Layer">
+              <i class="ri-add-line"></i>
+            </button>
+          </div>
+          <p class="section-desc">Combine multiple spirograph curves into stunning multi-color artwork.</p>
+
+          <!-- Layer List Container -->
+          <div class="layer-list" id="layer-list">
+            <!-- Layers dynamically populated here -->
+          </div>
+        </div>
+
+        <div class="panel-divider"></div>
+
+        <!-- Quick Tips & Shortcuts -->
+        <div class="panel-section tips-section">
+          <h3 class="tips-title"><i class="ri-lightbulb-line"></i> Pro Tips</h3>
+          <ul class="tips-list">
+            <li><strong>Spacebar:</strong> Play / Pause animation</li>
+            <li><strong>Manual Mode:</strong> Click and drag the wheel inside the ring to draw freehand!</li>
+            <li><strong>Pen Hole:</strong> Click directly on any of the holes inside the wheel gear to swap pen position.</li>
+          </ul>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Preset Library Modal -->
+    <div class="modal-backdrop" id="presets-modal">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h2><i class="ri-gallery-line"></i> Spirograph Design Gallery</h2>
+          <button class="modal-close" id="btn-close-presets">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="preset-grid" id="preset-grid">
+            <!-- Preset items dynamically rendered -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
